@@ -21,9 +21,6 @@ img_counter = 500
 # Turn on/off the ability to save images
 save_images, selected_gesture = False, 'peace'
 
-# Philips Hue Settings
-bridge_ip = '192.168.0.103'
-b = Bridge(bridge_ip)
 on_command = {'transitiontime': 0, 'on': True, 'bri': 254}
 off_command = {'transitiontime': 0, 'on': False, 'bri': 254}
 
@@ -34,7 +31,7 @@ gesture_names = {0: 'Fist',
                  3: 'Palm',
                  4: 'Peace'}
 
-model = load_model('/home/camilo/Descargas/VGG_cross_validated.h5')
+model = load_model('VGG_cross_validated.h5')
 
 
 """def predict_rgb_image(img):
@@ -47,12 +44,12 @@ def predict_rgb_image_vgg(image):
     image = np.array(image, dtype='float32')
     image /= 255
     pred_array = model.predict(image)
-    print(f'pred_array: {pred_array}')
-    result = gesture_names[np.argmax(pred_array)]
-    print(f'Result: {result}')
-    print(max(pred_array[0]))
-    score = float("%0.2f" % (max(pred_array[0]) * 100))
+    print('pred_array: {}'.format(pred_array))
+    result = gesture_names[np.argmax(pred_array[0])]
+    print('Result: {}'.format(result))
     print(result)
+    score = float("%0.2f" % (np.argmax(pred_array) * 100))
+    print(score)
     return result, score
 
 
@@ -106,15 +103,15 @@ while camera.isOpened():
         # cv2.putText(thresh, f"Prediction: {prediction} ({score}%)", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
         # cv2.putText(thresh, f"Action: {action}", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))  # Draw the text
         # Draw the text
-        cv2.putText(thresh, f"Prediction: {prediction} ({score}%)", (50, 30), cv2.FONT_HERSHEY_SIMPLEX, 1,
+        cv2.putText(thresh, "Prediction: {} ({}%)".format(prediction, score), (50, 30), cv2.FONT_HERSHEY_SIMPLEX, 1,
                     (255, 255, 255))
-        cv2.putText(thresh, f"Action: {action}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
+        cv2.putText(thresh, "Action: {}".format(action), (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
                     (255, 255, 255))  # Draw the text
         cv2.imshow('ori', thresh)
 
         # get the contours
         thresh1 = copy.deepcopy(thresh)
-        _, contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         length = len(contours)
         maxArea = -1
         if length > 0:
@@ -139,7 +136,6 @@ while camera.isOpened():
         break
     elif k == ord('b'):  # press 'b' to capture the background
         bgModel = cv2.createBackgroundSubtractorMOG2(0, bgSubThreshold)
-        b.set_light(6, on_command)
         time.sleep(2)
         isBgCaptured = 1
         print('Background captured')
@@ -162,18 +158,18 @@ while camera.isOpened():
         
         if prediction == 'Palm':
             pass
-            #action = "Lights on, music on"
+            action = "Lights on, music on"
         elif prediction == 'Fist':
             pass
-            #action = 'Lights off, music off'
+            action = 'Lights off, music off'
               
         elif prediction == 'L':
             pass
-            #action = 'Volume down'
+            action = 'Volume down'
 
         elif prediction == 'Okay':
             pass
-            #action = 'Volume up'
+            action = 'Volume up'
 
         elif prediction == 'Peace':
             pass
@@ -182,18 +178,18 @@ while camera.isOpened():
             pass
 
         if save_images:
-            img_name = f"./frames/drawings/drawing_{selected_gesture}_{img_counter}.jpg".format(
-                img_counter)
+            img_name = "./frames/drawings/drawing_{}_{}.jpg".format(
+                selected_gesture, img_counter)
             cv2.imwrite(img_name, drawing)
             print("{} written".format(img_name))
 
-            img_name2 = f"./frames/silhouettes/{selected_gesture}_{img_counter}.jpg".format(
-                img_counter)
+            img_name2 = "./frames/silhouettes/{}_{}.jpg".format(
+                selected_gesture, img_counter)
             cv2.imwrite(img_name2, thresh)
             print("{} written".format(img_name2))
 
-            img_name3 = f"./frames/masks/mask_{selected_gesture}_{img_counter}.jpg".format(
-                img_counter)
+            img_name3 = "./frames/masks/mask_{}_{}.jpg".format(
+                selected_gesture, img_counter)
             cv2.imwrite(img_name3, img)
             print("{} written".format(img_name3))
 
